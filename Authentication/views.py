@@ -1,14 +1,15 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view,authentication_classes
+from rest_framework.decorators import api_view,authentication_classes,permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.authentication import TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 import json
 from .serializers import farmerSerializer,userAuthSerializer,vendorSerializer
 from .models import Farmers,Vendor,userAuth
 from rest_framework import status
 
 @api_view(["POST"])
-# @authentication_classes(["TokenAuthentication"])
+
 def farmerSignUp(request):
    try:
     data=json.loads(request.body)
@@ -21,7 +22,8 @@ def farmerSignUp(request):
         print(serializer.is_valid(raise_exception=True))
         if serializer.is_valid(raise_exception=True):
             farmer=serializer.save()
-            return Response(farmer.fName,status=status.HTTP_201_CREATED)
+            token=RefreshToken.for_user(user)
+            return Response({"token":str(token.access_token) },status=status.HTTP_201_CREATED)
    except Exception as e:
        return Response(e.args)   
   
@@ -37,8 +39,9 @@ def vendorSignUp(request):
         print(data)
         serializer=vendorSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
-            user=serializer.save()
-            return Response(user.fName,status=status.HTTP_201_CREATED)
+            serializer.save()
+            token=RefreshToken.for_user(user)
+            return Response({"token":str(token.access_token) },status=status.HTTP_201_CREATED)
   except Exception as e:
       return Response(e.args,status=status.HTTP_400_BAD_REQUEST)      
               
@@ -50,6 +53,8 @@ def farmerLogin(request):
     farmer=Farmers.objects.get(farmer=data['id'])
     
     data=farmerSerializer(farmer).data
+    token=RefreshToken.for_user(farmer.farmer)
+    data['token']=str(token.access_token)
     return Response(data,status=status.HTTP_202_ACCEPTED)
      
    except Exception as e:
@@ -64,6 +69,8 @@ def vendorLogin(request):
     vendor=Vendor.objects.get(vendor=data['id'])
     
     data=vendorSerializer(vendor).data
+    token=RefreshToken.for_user(vendor.vendor)
+    data['token']=str(token.access_token)
     return Response(data,status=status.HTTP_202_ACCEPTED)
      
    except Exception as e:
@@ -71,6 +78,12 @@ def vendorLogin(request):
    
    
    
+     
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def tp(request):
+    return Response("hello")     
        
 @api_view(["POST"])
 def delete(request):

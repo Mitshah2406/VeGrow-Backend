@@ -5,3 +5,4 @@ requests
 django-cors-headers
 mysqlclient
 djangorestframework-simplejwt
+django-phonenumber-field[phonenumberslite]

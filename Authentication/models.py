@@ -3,21 +3,22 @@ from django.contrib.auth.models import BaseUserManager,AbstractBaseUser
 from phonenumber_field.modelfields import PhoneNumberField
 
 class userAuthManager(BaseUserManager):
-    def create_superuser(self, id, password=None ):
-       
-        user = self.create_user(
-           id=id
+    # def create_superuser(self, id, password=None ):
+    
+    #     user = self.create_user(
+    #        id=id
             
-        )
-        user.set_unusable_password()
+    #     )
+    #     user.set_unusable_password()
         
-        user.is_admin = True
-        user.save(using=self._db)
-        return user
+    #     user.is_admin = True
+    #     user.save(using=self._db)
+    #     return user
     def create_user(self,id):
         if not id: 
             raise ValueError("user must have an id")
         user=self.model(id=id)
+        # user.set_unusable_password()
         user.save(using=self._db)
         return user
           

@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import Farmers,Vendor,userAuth
+from .models import Farmers,Vendor,userAuth,ProductInventory
 from phonenumber_field.modelfields import PhoneNumberField
 
 class farmerSerializer(serializers.ModelSerializer):
     class Meta:
-        phone = PhoneNumberField(region="CA")
+    
         model=Farmers
         fields=[
             'farmer',
@@ -41,7 +41,7 @@ class userAuthSerializer(serializers.ModelSerializer):
 class vendorSerializer(serializers.ModelSerializer):
     class Meta:
         model=Vendor
-        phone = PhoneNumberField(region="CA")
+      
         fields=[
             'vendor',
             'location',
@@ -67,3 +67,22 @@ class vendorSerializer(serializers.ModelSerializer):
         print(user)
         return  user 
       
+class productInventorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model=ProductInventory
+        fields='__all__'
+    def create(self, validated_data):  
+        product=ProductInventory.objects.create(farmerId=validated_data['farmerId'])
+        # product.farmerId=validated_data['farmerId']
+        product.name=validated_data['name']
+        
+        print(validated_data['expiryDate'])
+        product.expiryDate=validated_data['expiryDate']
+        product.quantity=validated_data['quantity']
+        if 'discription' in validated_data:
+            product.description=validated_data['discription']
+        if 'images' in validated_data:
+            product.images=validated_data['images']
+        product.save()        
+        
+        return product

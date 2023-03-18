@@ -4,9 +4,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 import json
-from .serializers import farmerSerializer,userAuthSerializer,vendorSerializer
-from .models import Farmers,Vendor,userAuth
+import uuid
+
+from .serializers import farmerSerializer,userAuthSerializer,vendorSerializer,productInventorySerializer
+from .models import Farmers,Vendor,userAuth,ProductInventory
 from rest_framework import status
+
+from django.core import serializers
 
 
 #farmers
@@ -47,7 +51,23 @@ def farmerLogin(request):
   
   
   
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])       
+def addProductToInventory(request):
+ try: 
+  data=json.loads(request.body)
   
+  print(data)
+  serializer=productInventorySerializer(data=data)
+  if serializer.is_valid(raise_exception=True):
+      print("hi")      
+      product=serializer.save()
+      data=productInventorySerializer(product).data
+      print("hii",data)
+      return Response(data,status=status.HTTP_200_OK)
+ except Exception as e:
+   return Response(e.args,status=status.HTTP_400_BAD_REQUEST)    
   
   
 #vendors

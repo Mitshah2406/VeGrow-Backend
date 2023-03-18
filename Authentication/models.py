@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager,AbstractBaseUser
 from phonenumber_field.modelfields import PhoneNumberField
-
+import uuid
 class userAuthManager(BaseUserManager):
     # def create_superuser(self, id, password=None ):
     
@@ -67,3 +67,14 @@ class Farmers(models.Model):
     phone=PhoneNumberField(region='IN',null=True)
     email=models.EmailField(null=True)
              
+             
+class ProductInventory(models.Model):
+    productId=models.UUIDField(primary_key=True,default=uuid.uuid4)
+    farmerId=models.ForeignKey(Farmers,on_delete=models.CASCADE)
+    name=models.CharField(max_length=254)
+    description=models.TextField(null=True)
+    listedDate=models.DateField(auto_now_add=True)
+    expiryDate=models.DateField(null=True)
+    images=models.TextField(default='',null=True)
+    quantity=models.JSONField(default=dict)
+                 

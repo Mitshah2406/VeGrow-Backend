@@ -1,12 +1,14 @@
 from django.urls import path;
-from .import views
+from .import views      
 
 urlpatterns = [
     path('farmerSignUp/',views.farmerSignUp,name='farmerSignUp'),
     path('farmerLogin/',views.farmerLogin,name="farmerLogin"),
     path("addProductToInventory/",views.addProductToInventory),
+    path("getMyAllProducts/",views.getMyAllProducts),
     path('vendorSignUp/',views.vendorSignUp,name="vendorSignUp"),
-    path('vendorLogin/',views.vendorLogin,name="vendorLogin"),  
+    path('vendorLogin/',views.vendorLogin,name="vendorLogin"),
+    path('searchProduct/',views.searchProduct), 
     
     
     path('tp/',views.tp,name="vendorLogin"),   

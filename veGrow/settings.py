@@ -65,7 +65,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'veGrow.wsgi.application'
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
+DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.mysql',

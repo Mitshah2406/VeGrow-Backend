@@ -74,15 +74,15 @@ class productInventorySerializer(serializers.ModelSerializer):
     def create(self, validated_data):  
         product=ProductInventory.objects.create(farmerId=validated_data['farmerId'])
         # product.farmerId=validated_data['farmerId']
-        product.name=validated_data['name']
+        product.productName=validated_data['productName']
         
-        print(validated_data['expiryDate'])
-        product.expiryDate=validated_data['expiryDate']
-        product.quantity=validated_data['quantity']
-        if 'discription' in validated_data:
-            product.description=validated_data['discription']
-        if 'images' in validated_data:
-            product.images=validated_data['images']
+  
+        product.productExpiryDate=validated_data['productExpiryDate']
+        product.productQuantity=validated_data['productQuantity']
+        if 'productDiscription' in validated_data:
+            product.productDescription=validated_data['productDiscription']
+        if 'productImages' in validated_data:
+            product.productImages=validated_data['productImages']
         product.save()        
         
         return product

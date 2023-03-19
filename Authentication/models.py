@@ -34,7 +34,7 @@ class userAuth(AbstractBaseUser):
     def __str__(self):   
         return self.id
     def has_perm(self, perm, obj=None):
-        
+
         return True
 
     def has_module_perms(self, app_label):
@@ -71,10 +71,19 @@ class Farmers(models.Model):
 class ProductInventory(models.Model):
     productId=models.UUIDField(primary_key=True,default=uuid.uuid4)
     farmerId=models.ForeignKey(Farmers,on_delete=models.CASCADE)
-    name=models.CharField(max_length=254)
-    description=models.TextField(null=True)
-    listedDate=models.DateField(auto_now_add=True)
-    expiryDate=models.DateField(null=True)
-    images=models.TextField(default='',null=True)
-    quantity=models.JSONField(default=dict)
+    productName=models.CharField(max_length=254)
+    productDescription=models.TextField(null=True)
+    productListedDate=models.DateField(auto_now_add=True)
+    productExpiryDate=models.DateField(null=True)
+    productImages=models.TextField(default='',null=True)
+    productQuantity=models.JSONField(default=dict)
                  
+                 
+class allProductList(models.Model):
+    id=models.AutoField(primary_key=True)
+    products=models.CharField(max_length=254)
+    imgage=models.ImageField(upload_to="farmers/allProductList",null=True)
+    
+    
+    
+                     

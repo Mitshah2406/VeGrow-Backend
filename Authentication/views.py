@@ -2,10 +2,11 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,authentication_classes,permission_classes,parser_classes
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken,AccessToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 import json
+# from rest_framework.exceptions im
 import os
 from django.core.files.base import ContentFile
 from rest_framework.parsers import MultiPartParser ,FormParser,JSONParser
@@ -152,20 +153,21 @@ def phoneNumberCheck(request):
   try:  
     data="+91"+str(json.loads(request.body)['phone'])
     print(data)
-    farmer=Farmers.objects.filter(phone=data)
-    print(farmer)
-    if farmer:
-        token=RefreshToken.for_user(farmer)
-        return Response({"exist":True,"token":str(token.access_token)},status=status.HTTP_200_OK)
-    vendor=Vendor.objects.filter(phone=data)
-    if vendor:
-      token=RefreshToken.for_user(vendor)
-      return Response({"exist":True,"token":str(token.access_token)},status=status.HTTP_200_OK)
-    return Response({"exist":False},status=status.HTTP_200_OK) 
+    farmer=Farmers.objects.get(phone=data)
+    token=AccessToken.for_user(farmer.farmer)
+    return  Response({"exist":True,"token":str(token)},status=status.HTTP_200_OK) 
+    
+  except Exception as e: 
+      print(e.args)
+      
+      try:
+        vendor=Vendor.objects.get(phone=data)
+        token=AccessToken.for_user(vendor.vendor)
+        return  Response({"exist":True,"token":str(token)},status=status.HTTP_200_OK) 
 
-  except Exception as e:   
-      return Response(e.args,status=status.HTTP_400_BAD_REQUEST)    
-
+      except : 
+            return  Response({"exist":False},status=status.HTTP_200_OK) 
+         
 
 
 

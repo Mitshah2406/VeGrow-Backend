@@ -1,21 +1,14 @@
 from rest_framework import serializers
-from .models import Farmers,Vendor,userAuth,ProductInventory
+from .models import Farmers,Vendor,userAuth,ProductInventory,AllProductList
 from phonenumber_field.modelfields import PhoneNumberField
 
 class farmerSerializer(serializers.ModelSerializer):
     class Meta:
     
         model=Farmers
-        fields=[
-            'farmer',
-                'fName',
-                'lName',
-                'email',
-                'phone',
-                'location'
-                ]
+        fields='__all__'
     def create(self, validated_data):
-        user=Farmers.objects.create(farmer=validated_data['farmer'])
+        user=Farmers.objects.create(id=validated_data['id'])
         user.fName=validated_data['fName']
         user.lName=validated_data['lName']
         if "email" in validated_data:    
@@ -42,18 +35,9 @@ class vendorSerializer(serializers.ModelSerializer):
     class Meta:
         model=Vendor
       
-        fields=[
-            'vendor',
-            'location',
-                'fName',
-                'lName',
-                'email',
-                'phone',
-                
-                ]
-    
+        fields="__all__"
     def create(self, validated_data):
-        user=Vendor.objects.create(vendor=validated_data['vendor'])
+        user=Vendor.objects.create(id=validated_data['id'])
         user.fName=validated_data['fName']
         user.lName=validated_data['lName']
       
@@ -66,14 +50,24 @@ class vendorSerializer(serializers.ModelSerializer):
         user.save()
         print(user)
         return  user 
-      
+   
+   
+   
+class AllProductListSerializer(serializers.ModelSerializer):
+   class Meta:
+       model=AllProductList
+       fields="__all__"
+       
 class productInventorySerializer(serializers.ModelSerializer):
     class Meta:
         model=ProductInventory
         fields='__all__'
     def create(self, validated_data):  
         product=ProductInventory.objects.create(farmerId=validated_data['farmerId'])
-        # product.farmerId=validated_data['farmerId']
+        print("hhhhhr")
+        print(validated_data["productId"])
+        product.productId=validated_data["productId"]
+        print(validated_data["productId"])
         product.productName=validated_data['productName']
         
   

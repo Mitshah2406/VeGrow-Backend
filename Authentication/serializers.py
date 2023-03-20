@@ -34,7 +34,7 @@ class userAuthSerializer(serializers.ModelSerializer):
         fields=[
             
             'id',
-            'roll'
+            'role'
         ]    
 
 

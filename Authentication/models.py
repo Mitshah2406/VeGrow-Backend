@@ -25,11 +25,11 @@ class userAuthManager(BaseUserManager):
 class userAuth(AbstractBaseUser):
     
     id=models.CharField(max_length=254,primary_key=True)
-    roll=models.CharField(max_length=254,null=False)
+    role=models.CharField(max_length=254,null=False)
      
     objects=userAuthManager()
     USERNAME_FIELD='id'
-    REQUIRED_FIELDS=['roll']
+    REQUIRED_FIELDS=['role']
     
     def __str__(self):   
         return self.id

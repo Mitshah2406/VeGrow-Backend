@@ -19,16 +19,16 @@ from rest_framework import status
 @api_view(["POST"])
 def farmerSignUp(request):
    try:
-    print("hello")     
+  
     data=json.loads(request.body)
-    print("hello")
-    serializer=userAuthSerializer(data={'id':data['id'],"roll":"farmer"})
+
+    serializer=userAuthSerializer(data={'id':data['id'],"role":"farmer"})
   
     if serializer.is_valid(raise_exception=True):
         user=serializer.save()
         data['farmer']=user   
         serializer=farmerSerializer(data=data)
-        print("Sssss")
+     
         print(serializer.is_valid(raise_exception=True))
         if serializer.is_valid(raise_exception=True):
             farmer=serializer.save()
@@ -116,7 +116,7 @@ def getMyAllProducts(request):
 def vendorSignUp(request):
   try:  
     data=json.loads(request.body)
-    serializer=userAuthSerializer(data={"id":data['id'],"roll":"vendor"})
+    serializer=userAuthSerializer(data={"id":data['id'],"role":"vendor"})
     if serializer.is_valid(raise_exception=True):
         user=serializer.save()
         data['vendor']=user
@@ -183,8 +183,9 @@ def phoneNumberCheck(request):
     data="+91"+str(json.loads(request.body)['phone'])
     print(data)
     farmer=Farmers.objects.get(phone=data)
+    farmerData=farmerSerializer(farmer).data
     token=AccessToken.for_user(farmer.farmer)
-    return  Response({"exist":True,"token":str(token)},status=status.HTTP_200_OK) 
+    return  Response({"exist":True,"token":str(token),"data":farmerData,"role":"farmer"},status=status.HTTP_200_OK) 
     
   except Exception as e: 
       print(e)
@@ -192,7 +193,8 @@ def phoneNumberCheck(request):
       try:
         vendor=Vendor.objects.get(phone=data)
         token=AccessToken.for_user(vendor.vendor)
-        return  Response({"exist":True,"token":str(token)},status=status.HTTP_200_OK) 
+        vendordata=vendorSerializer(vendor).data
+        return  Response({"exist":True,"token":str(token),"data":vendordata,"role":"vendor"},status=status.HTTP_200_OK) 
 
       except : 
             return  Response({"exist":False},status=status.HTTP_200_OK) 

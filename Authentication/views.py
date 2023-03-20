@@ -185,17 +185,23 @@ def phoneNumberCheck(request):
     farmer=Farmers.objects.get(phone=data)
     farmerData=farmerSerializer(farmer).data
     token=AccessToken.for_user(farmer.farmer)
-    return  Response({"exist":True,"token":str(token),"data":farmerData,"role":"farmer"},status=status.HTTP_200_OK) 
+    newRes = {"exist":True,"token":str(token),"role":"farmer"}
+    newRes.update(farmerData)
+    return  Response(newRes,status=status.HTTP_200_OK) 
     
   except Exception as e: 
+      print("farmer")
       print(e)
       
       try:
         vendor=Vendor.objects.get(phone=data)
         token=AccessToken.for_user(vendor.vendor)
         vendordata=vendorSerializer(vendor).data
-        return  Response({"exist":True,"token":str(token),"data":vendordata,"role":"vendor"},status=status.HTTP_200_OK) 
-
+        # return  Response({"exist":True,"token":str(token),"data":vendordata,"role":"vendor"},status=status.HTTP_200_OK) 
+        newRes = {"exist":True,"token":str(token),"role":"vendor"}
+        newRes.update(vendordata)
+        return  Response(newRes,status=status.HTTP_200_OK) 
+    
       except : 
             return  Response({"exist":False},status=status.HTTP_200_OK) 
          

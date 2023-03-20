@@ -9,8 +9,8 @@ from django.core.files.base import ContentFile
 from rest_framework.parsers import MultiPartParser ,FormParser,JSONParser
 import uuid
 from PIL import Image
-from .serializers import farmerSerializer,userAuthSerializer,vendorSerializer,productInventorySerializer
-from .models import Farmers,Vendor,userAuth,ProductInventory
+from .serializers import farmerSerializer,userAuthSerializer,vendorSerializer,productInventorySerializer,AllProductListSerializer
+from .models import Farmers,Vendor,userAuth,ProductInventory,AllProductList     
 from rest_framework import status
 
 
@@ -26,7 +26,7 @@ def farmerSignUp(request):
   
     if serializer.is_valid(raise_exception=True):
         user=serializer.save()
-        data['farmer']=user   
+        data['id']=user   
         serializer=farmerSerializer(data=data)
      
         print(serializer.is_valid(raise_exception=True))
@@ -45,7 +45,7 @@ def farmerLogin(request):
     farmer=Farmers.objects.get(farmer=data['id'])
     
     data=farmerSerializer(farmer).data
-    token=RefreshToken.for_user(farmer.farmer)
+    token=RefreshToken.for_user(farmer.id)
     data['token']=str(token.access_token)
     return Response(data,status=status.HTTP_202_ACCEPTED)
      
@@ -63,7 +63,14 @@ def addProductToInventory(request):
  try:    
    path=settings.MEDIA_ROOT+"/farmers/produce/"
    data={}
-   data['productName']=request.POST.get('productName')   
+   data['productId']=request.POST.get('productId')
+    
+   print(data["productId"])
+   product=AllProductList.objects.get(id=data['productId'])
+   data['productName']=product.productName
+   print(data["productName"])
+   
+ 
    data['productDescription']=request.POST.get('productDescription')
    data['productExpiryDate']=request.POST.get('productExpiryDate')
    data['productQuantity']=json.loads(request.POST.get('productQuantity'))
@@ -71,7 +78,8 @@ def addProductToInventory(request):
       
    imagelist=''
    images=request.FILES.getlist('images')
-   for x in images:
+   if len(images) != 0:
+    for x in images:
      rawByte=x.read()
      img=ContentFile(rawByte) 
      img=Image.open(img)  
@@ -80,7 +88,7 @@ def addProductToInventory(request):
      img.save(path+uid+".png",'png')
      
    data['productImages']=imagelist
-   print()
+
    serialaizer=productInventorySerializer(data=data)
    if serialaizer.is_valid(raise_exception=True):
       serialaizer.save()
@@ -119,7 +127,7 @@ def vendorSignUp(request):
     serializer=userAuthSerializer(data={"id":data['id'],"role":"vendor"})
     if serializer.is_valid(raise_exception=True):
         user=serializer.save()
-        data['vendor']=user
+        data['id']=user
         print(data)
         serializer=vendorSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
@@ -137,10 +145,10 @@ def vendorLogin(request):
    try:
        
     data=json.loads(request.body)         
-    vendor=Vendor.objects.get(vendor=data['id'])
+    vendor=Vendor.objects.get(id=data['id'])
     
     data=vendorSerializer(vendor).data
-    token=RefreshToken.for_user(vendor.vendor)
+    token=RefreshToken.for_user(vendor.id)
     data['token']=str(token.access_token)
     return Response(data,status=status.HTTP_202_ACCEPTED)
      
@@ -161,12 +169,12 @@ def tp(request):
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def searchProduct(request):  
+def searchProductforFarmer(request):  
  try:    
   data=json.loads(request.body)
-  dataList=ProductInventory.objects.filter(productName__istartswith=data['search'])
+  dataList=AllProductList.objects.filter(productName__istartswith=data['search'])
   
-  dataList=productInventorySerializer(dataList,many=True).data
+  dataList=AllProductListSerializer(dataList,many=True).data
   print(dataList)
   return Response(dataList,status=status.HTTP_200_OK)
  except Exception as e:
@@ -184,18 +192,26 @@ def phoneNumberCheck(request):
     print(data)
     farmer=Farmers.objects.get(phone=data)
     farmerData=farmerSerializer(farmer).data
-    token=AccessToken.for_user(farmer.farmer)
+    token=AccessToken.for_user(farmer.id)
+    newRes = {"exist":True,"token":str(token),"role":"farmer"}
+    newRes.update(farmerData)
+    return  Response(newRes,status=status.HTTP_200_OK) 
+    token=AccessToken.for_user(farmer.id)
     return  Response({"exist":True,"token":str(token),"data":farmerData,"role":"farmer"},status=status.HTTP_200_OK) 
     
   except Exception as e: 
+      print("farmer")
       print(e)
       
       try:
         vendor=Vendor.objects.get(phone=data)
-        token=AccessToken.for_user(vendor.vendor)
+        token=AccessToken.for_user(vendor.id)
         vendordata=vendorSerializer(vendor).data
-        return  Response({"exist":True,"token":str(token),"data":vendordata,"role":"vendor"},status=status.HTTP_200_OK) 
-
+        # return  Response({"exist":True,"token":str(token),"data":vendordata,"role":"vendor"},status=status.HTTP_200_OK) 
+        newRes = {"exist":True,"token":str(token),"role":"vendor"}
+        newRes.update(vendordata)
+        return  Response(newRes,status=status.HTTP_200_OK) 
+    
       except : 
             return  Response({"exist":False},status=status.HTTP_200_OK) 
          
@@ -208,9 +224,17 @@ def delete(request):
     res=userAuth.objects.all().delete()
     return Response(res)   
     
-                
-  
-        
+@api_view(["POST"])
+def insertInAllProducts(request):
+  data=json.loads(request.body)             
+  products=data['list']
+  for x in products:
+    print(x)
+    serializer=AllProductListSerializer(data={"productName":x})
+    if serializer.is_valid(raise_exception=True):
+      serializer.save()
+      print(x)
+  return Response(products)      
   
 
 

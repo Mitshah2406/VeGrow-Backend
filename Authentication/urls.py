@@ -8,7 +8,8 @@ urlpatterns = [
     path("getMyAllProducts/",views.getMyAllProducts),
     path('vendorSignUp/',views.vendorSignUp,name="vendorSignUp"),
     path('vendorLogin/',views.vendorLogin,name="vendorLogin"),
-    path('searchProduct/',views.searchProduct), 
+    path('searchProductForFarmer/',views.searchProductforFarmer), 
+    path('insertAllProductList/',views.insertInAllProducts),
     
     
     path('tp/',views.tp,name="vendorLogin"),   

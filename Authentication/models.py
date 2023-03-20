@@ -46,13 +46,10 @@ class userAuth(AbstractBaseUser):
     def is_staff(self):
      
         return self.id
-          
-         
-    
-    
+           
        
 class Vendor(models.Model):
-    vendor=models.OneToOneField(userAuth,on_delete=models.CASCADE,primary_key=True)
+    id=models.OneToOneField(userAuth,on_delete=models.CASCADE,primary_key=True)
     fName=models.CharField(max_length=254)
     lName=models.CharField(max_length=254)
     location=models.JSONField(default=dict,null=True)    
@@ -60,16 +57,22 @@ class Vendor(models.Model):
     email=models.EmailField(null=True)
     
 class Farmers(models.Model):
-    farmer=models.OneToOneField(userAuth,on_delete=models.CASCADE,primary_key=True)
+    id=models.OneToOneField(userAuth,on_delete=models.CASCADE,primary_key=True)
     fName=models.CharField(max_length=254)
     lName=models.CharField(max_length=254)
     location=models.JSONField(default=dict,null=True) 
     phone=PhoneNumberField(region='IN',null=True)
     email=models.EmailField(null=True)
-             
+  
+  
+class AllProductList(models.Model):
+    id=models.AutoField(primary_key=True)
+    productName=models.CharField(max_length=254,unique=True)
+    imgage=models.ImageField(upload_to="farmers/allProductList",null=True)             
              
 class ProductInventory(models.Model):
-    productId=models.UUIDField(primary_key=True,default=uuid.uuid4)
+    productId=models.ForeignKey(AllProductList,on_delete=models.PROTECT)
+    inventoryId=models.UUIDField(primary_key=True,default=uuid.uuid4)
     farmerId=models.ForeignKey(Farmers,on_delete=models.CASCADE)
     productName=models.CharField(max_length=254)
     productDescription=models.TextField(null=True)
@@ -79,10 +82,7 @@ class ProductInventory(models.Model):
     productQuantity=models.JSONField(default=dict)
                  
                  
-class allProductList(models.Model):
-    id=models.AutoField(primary_key=True)
-    products=models.CharField(max_length=254)
-    imgage=models.ImageField(upload_to="farmers/allProductList",null=True)
+
     
     
     

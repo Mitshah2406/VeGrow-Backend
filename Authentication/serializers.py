@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Farmers,Vendor,userAuth,ProductInventory,AllProductList
-from phonenumber_field.modelfields import PhoneNumberField
+
 
 class farmerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,16 +57,17 @@ class AllProductListSerializer(serializers.ModelSerializer):
    class Meta:
        model=AllProductList
        fields="__all__"
+ 
+ 
+ 
        
 class productInventorySerializer(serializers.ModelSerializer):
     class Meta:
         model=ProductInventory
-        fields='__all__'
+        fields="__all__"
     def create(self, validated_data):  
-        product=ProductInventory.objects.create(farmerId=validated_data['farmerId'])
-        print("hhhhhr")
-        print(validated_data["productId"])
-        product.productId=validated_data["productId"]
+       
+        product=ProductInventory.objects.create(farmerId=validated_data['farmerId'],productId=validated_data["productId"])
         print(validated_data["productId"])
         product.productName=validated_data['productName']
         
@@ -80,3 +81,6 @@ class productInventorySerializer(serializers.ModelSerializer):
         product.save()        
         
         return product
+    
+    
+        

@@ -34,13 +34,16 @@ def farmerSignUp(request):
         if serializer.is_valid(raise_exception=True):
             farmer=serializer.save()
             token=RefreshToken.for_user(user)
-            return Response({"token":str(token.access_token) },status=status.HTTP_201_CREATED)
+            print(f"this is user {user.id}")
+            return Response({"token":str(token.access_token) ,"id":user.id},status=status.HTTP_201_CREATED)
    except Exception as e:
        print(e)
        return Response(e.args,status=status.HTTP_400_BAD_REQUEST)   
   
   
 @api_view(["POST"])  
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])  
 def addFarmerLocationDetails(request):
  try:
   data=json.loads(request.body)

@@ -9,6 +9,7 @@ class farmerSerializer(serializers.ModelSerializer):
         fields='__all__'
     def create(self, validated_data):
         user=Farmers.objects.create(id=validated_data['id'])
+        
         user.fName=validated_data['fName']
         user.lName=validated_data['lName']
         if "email" in validated_data:    
@@ -66,14 +67,11 @@ class productInventorySerializer(serializers.ModelSerializer):
         model=ProductInventory
         fields="__all__"
     def create(self, validated_data):  
-       
-        product=ProductInventory.objects.create(farmerId=validated_data['farmerId'],productId=validated_data["productId"])
-        print(validated_data["productId"])
+        product=ProductInventory.objects.create(farmerId=validated_data['farmerId'],productId=validated_data["productId"],initialBidPrice=validated_data['initialBidPrice'])
         product.productName=validated_data['productName']
-        
-  
         product.productExpiryDate=validated_data['productExpiryDate']
-        product.productQuantity=validated_data['productQuantity']
+        product.unit=validated_data['unit']
+        product.unitValue=validated_data['unitValue']
         if 'productDescription' in validated_data:
             product.productDescription=validated_data['productDescription']
         if 'productImages' in validated_data:

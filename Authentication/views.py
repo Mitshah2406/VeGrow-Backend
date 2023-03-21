@@ -53,6 +53,17 @@ def addFarmerLocationDetails(request):
   print(e.args)
   return Response(e.args,status=status.HTTP_400_BAD_REQUEST)  
 
+@api_view(["POST"])  
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])   
+def specificFarmerData(request):
+ try: 
+  data=json.loads(request.body)
+  farmer=Farmers.objects.get(id=data['id'])
+  serializer=farmerSerializer(farmer).data
+  return Response(serializer,status=status.HTTP_200_OK)
+ except Exception as e:
+   return Response(e.args,status=status.HTTP_400_BAD_REQUEST) 
     
 @api_view(["POST"])
 def farmerLogin(request):
@@ -83,11 +94,15 @@ def addProductToInventory(request):
    print(request.POST.get('productId'))
    product=AllProductList.objects.get(id=request.POST.get('productId'))
    data['productName']=product.productName
+   data['initialBidPrice']=request.POST.get('initialBidPrice')
+   print(f"ininit {data['initialBidPrice']}")
+   data['unit']=request.POST.get('unit')
+   data['unitValue']=request.POST.get('unitValue')  
    data['productId']=product.pk
    print(data["productName"])
    data['productDescription']=request.POST.get('productDescription')
    data['productExpiryDate']=request.POST.get('productExpiryDate')
-   data['productQuantity']=json.loads(request.POST.get('productQuantity'))
+   
    data['farmerId']=request.POST.get('farmerId')
       
    imagelist=''
@@ -200,8 +215,8 @@ def tp(request):
 @permission_classes([IsAuthenticated])
 def searchProductforFarmer(request):  
  try:    
-  data=json.loads(request.body)
-  dataList=AllProductList.objects.filter(productName__istartswith=data['search'])
+  
+  dataList=AllProductList.objects.all()
   
   dataList=AllProductListSerializer(dataList,many=True).data
   print(dataList)

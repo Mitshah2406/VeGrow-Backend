@@ -63,6 +63,7 @@ class Farmers(models.Model):
     location=models.JSONField(default=dict,null=True) 
     phone=PhoneNumberField(region='IN',null=True)
     email=models.EmailField(null=True)
+    
   
   
 class AllProductList(models.Model):
@@ -80,8 +81,10 @@ class ProductInventory(models.Model):
     productListedDate=models.DateField(auto_now_add=True)
     productExpiryDate=models.DateField(null=True)
     productImages=models.TextField(default='',null=True,blank=True)
-    productQuantity=models.JSONField(default=dict)
-    # initailBidValue=models.IntegerField(max_length=)
+    unit=models.CharField(max_length=254,null=True)
+    unitValue=models.CharField(max_length=254,null=True)
+    initialBidPrice=models.DecimalField(max_digits=15,decimal_places=2)
+    
                  
                  
 

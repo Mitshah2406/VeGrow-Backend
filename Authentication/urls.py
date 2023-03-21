@@ -5,6 +5,7 @@ urlpatterns = [
     path('farmerSignUp/',views.farmerSignUp,name='farmerSignUp'),
     path('farmerLogin/',views.farmerLogin,name="farmerLogin"),
     path('searchProductForFarmer/',views.searchProductforFarmer),
+    path("specificFarmerData/",views.specificFarmerData),
     path("addFarmerLocationDetails/",views.addFarmerLocationDetails),
     path("addProductToInventory/",views.addProductToInventory),
     path("getMyListedProductDetails/",views.getMyListedProductDetails),

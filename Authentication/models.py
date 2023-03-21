@@ -81,8 +81,8 @@ class ProductInventory(models.Model):
     productListedDate=models.DateField(auto_now_add=True)
     productExpiryDate=models.DateField(null=True)
     productImages=models.TextField(default='',null=True,blank=True)
-    unit=models.CharField(max_length=254,null=True)
-    unitValue=models.CharField(max_length=254,null=True)
+    productUnit=models.CharField(max_length=254,null=True)
+    productQunatity=models.CharField(max_length=254,null=True)
     initialBidPrice=models.DecimalField(max_digits=15,decimal_places=2)
     
                  

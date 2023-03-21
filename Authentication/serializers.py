@@ -70,8 +70,8 @@ class productInventorySerializer(serializers.ModelSerializer):
         product=ProductInventory.objects.create(farmerId=validated_data['farmerId'],productId=validated_data["productId"],initialBidPrice=validated_data['initialBidPrice'])
         product.productName=validated_data['productName']
         product.productExpiryDate=validated_data['productExpiryDate']
-        product.unit=validated_data['unit']
-        product.unitValue=validated_data['unitValue']
+        product.productUnit=validated_data['productUnit']
+      
         if 'productDescription' in validated_data:
             product.productDescription=validated_data['productDescription']
         if 'productImages' in validated_data:

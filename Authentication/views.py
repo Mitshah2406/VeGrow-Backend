@@ -96,8 +96,8 @@ def addProductToInventory(request):
    data['productName']=product.productName
    data['initialBidPrice']=request.POST.get('initialBidPrice')
    print(f"ininit {data['initialBidPrice']}")
-   data['unit']=request.POST.get('unit')
-   data['unitValue']=request.POST.get('unitValue')  
+   data['productUnit']=request.POST.get('productUnit')
+   data['productQunatity']=request.POST.get('productQunatity')  
    data['productId']=product.pk
    print(data["productName"])
    data['productDescription']=request.POST.get('productDescription')

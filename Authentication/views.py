@@ -12,6 +12,7 @@ from PIL import Image
 from .serializers import farmerSerializer,userAuthSerializer,vendorSerializer,productInventorySerializer,AllProductListSerializer
 from .models import Farmers,Vendor,userAuth,ProductInventory,AllProductList     
 from rest_framework import status
+import random
 
 
 
@@ -38,6 +39,18 @@ def farmerSignUp(request):
        print(e)
        return Response(e.args,status=status.HTTP_400_BAD_REQUEST)   
   
+  
+@api_view(["POST"])  
+def addFarmerLocationDetails(request):
+ try:
+  data=json.loads(request.body)
+  farmer=Farmers.objects.filter(id=data['id']).update(location=data['location'])
+  return Response("done",status=status.HTTP_200_OK)  
+ except Exception as e:
+  print(e.args)
+  return Response(e.args,status=status.HTTP_400_BAD_REQUEST)  
+
+    
 @api_view(["POST"])
 def farmerLogin(request):
    try:
@@ -62,15 +75,13 @@ def farmerLogin(request):
 def addProductToInventory(request):
  try:    
    path=settings.MEDIA_ROOT+"/farmers/produce/"
-   data={}
-   data['productId']=request.POST.get('productId')
-    
-   print(data["productId"])
-   product=AllProductList.objects.get(id=data['productId'])
+   data={} 
+   print(request.FILES.getlist('images'))   
+   print(request.POST.get('productId'))
+   product=AllProductList.objects.get(id=request.POST.get('productId'))
    data['productName']=product.productName
+   data['productId']=product.pk
    print(data["productName"])
-   
- 
    data['productDescription']=request.POST.get('productDescription')
    data['productExpiryDate']=request.POST.get('productExpiryDate')
    data['productQuantity']=json.loads(request.POST.get('productQuantity'))
@@ -86,9 +97,11 @@ def addProductToInventory(request):
      uid=str(uuid.uuid4())
      imagelist=imagelist+uid+".png"+","
      img.save(path+uid+".png",'png')
+   else:
+     imagelist=''  
      
    data['productImages']=imagelist
-
+   
    serialaizer=productInventorySerializer(data=data)
    if serialaizer.is_valid(raise_exception=True):
       serialaizer.save()
@@ -102,22 +115,35 @@ def addProductToInventory(request):
 @api_view(["POST"]) 
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def getMyAllProducts(request):
- try:
+def getMyListedProductList(request):   
+ try:     
   data=json.loads(request.body)
-  productList=ProductInventory.objects.filter(farmerId=data['farmerId'])
-  productList=productInventorySerializer(productList,many=True).data
-  print(type(productList))
+  
+  productList=ProductInventory.objects.filter(farmerId=data['farmerId']).values("inventoryId","productName","productExpiryDate","productQuantity")
+    
   return Response(productList,status=status.HTTP_200_OK)
  except Exception as e:
     print(e.args)
     return Response(e.args,status=status.HTTP_400_BAD_REQUEST)
  
-
+ 
+@api_view(["POST"]) 
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def getMyListedProductDetails(request):
+  try:
+    data=json.loads(request.body)
+    inventory=ProductInventory.objects.get(inventoryId=data["inventoryId"])
+    print(data)  
+    data=productInventorySerializer(inventory).data
+    return Response(data)
     
-
-
+  except Exception as e:
+    print(e.args)
+    return Response(e.args,status=status.HTTP_400_BAD_REQUEST)
+    
   
+      
   
 #vendors
 @api_view(["POST"])
@@ -196,8 +222,7 @@ def phoneNumberCheck(request):
     newRes = {"exist":True,"token":str(token),"role":"farmer"}
     newRes.update(farmerData)
     return  Response(newRes,status=status.HTTP_200_OK) 
-    token=AccessToken.for_user(farmer.id)
-    return  Response({"exist":True,"token":str(token),"data":farmerData,"role":"farmer"},status=status.HTTP_200_OK) 
+    
     
   except Exception as e: 
       print("farmer")
@@ -207,7 +232,7 @@ def phoneNumberCheck(request):
         vendor=Vendor.objects.get(phone=data)
         token=AccessToken.for_user(vendor.id)
         vendordata=vendorSerializer(vendor).data
-        # return  Response({"exist":True,"token":str(token),"data":vendordata,"role":"vendor"},status=status.HTTP_200_OK) 
+       
         newRes = {"exist":True,"token":str(token),"role":"vendor"}
         newRes.update(vendordata)
         return  Response(newRes,status=status.HTTP_200_OK) 
@@ -230,7 +255,8 @@ def insertInAllProducts(request):
   products=data['list']
   for x in products:
     print(x)
-    serializer=AllProductListSerializer(data={"productName":x})
+    print()
+    serializer=AllProductListSerializer(data={"productName":x,"productMarketPrice":"%.2f"%random.uniform(40,200)})
     if serializer.is_valid(raise_exception=True):
       serializer.save()
       print(x)

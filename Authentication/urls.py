@@ -4,11 +4,14 @@ from .import views
 urlpatterns = [
     path('farmerSignUp/',views.farmerSignUp,name='farmerSignUp'),
     path('farmerLogin/',views.farmerLogin,name="farmerLogin"),
+    path('searchProductForFarmer/',views.searchProductforFarmer),
+    path("addFarmerLocationDetails/",views.addFarmerLocationDetails),
     path("addProductToInventory/",views.addProductToInventory),
-    path("getMyAllProducts/",views.getMyAllProducts),
+    path("getMyListedProductDetails/",views.getMyListedProductDetails),
+    path("getMyListedProductList/",views.getMyListedProductList),
     path('vendorSignUp/',views.vendorSignUp,name="vendorSignUp"),
     path('vendorLogin/',views.vendorLogin,name="vendorLogin"),
-    path('searchProductForFarmer/',views.searchProductforFarmer), 
+ 
     path('insertAllProductList/',views.insertInAllProducts),
     
     

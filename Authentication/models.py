@@ -68,7 +68,8 @@ class Farmers(models.Model):
 class AllProductList(models.Model):
     id=models.AutoField(primary_key=True)
     productName=models.CharField(max_length=254,unique=True)
-    imgage=models.ImageField(upload_to="farmers/allProductList",null=True)             
+    imgage=models.ImageField(upload_to="farmers/allProductList",null=True)  
+    productMarketPrice=models.DecimalField(max_digits=10,decimal_places=2)           
              
 class ProductInventory(models.Model):
     productId=models.ForeignKey(AllProductList,on_delete=models.PROTECT)
@@ -78,8 +79,9 @@ class ProductInventory(models.Model):
     productDescription=models.TextField(null=True)
     productListedDate=models.DateField(auto_now_add=True)
     productExpiryDate=models.DateField(null=True)
-    productImages=models.TextField(default='',null=True)
+    productImages=models.TextField(default='',null=True,blank=True)
     productQuantity=models.JSONField(default=dict)
+    # initailBidValue=models.IntegerField(max_length=)
                  
                  
 

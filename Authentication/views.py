@@ -38,7 +38,7 @@ def farmerSignUp(request):
             
             token=AccessToken.for_user(user)
             print(token)
-            farmer.update({"token":str(token)})  
+            farmer.update({"token":str(token),"role":"farmer"})  
             
             print(f"this is user {user.id}")
             return Response( farmer,status=status.HTTP_201_CREATED)
@@ -144,9 +144,9 @@ def getMyListedProductList(request):
  try:     
   data=json.loads(request.body)
   
-  productList=ProductInventory.objects.filter(farmerId=data['farmerId']).values("inventoryId","productName","productExpiryDate","productQuantity")
-    
-  return Response(productList,status=status.HTTP_200_OK)
+  productList=ProductInventory.objects.filter(farmerId=data['farmerId'])
+  data=productInventorySerializer(productList,many=True).data
+  return Response(data,status=status.HTTP_200_OK)
  except Exception as e:
     print(e.args)
     return Response(e.args,status=status.HTTP_400_BAD_REQUEST)

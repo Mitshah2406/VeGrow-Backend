@@ -82,7 +82,7 @@ class ProductInventory(models.Model):
     productExpiryDate=models.DateField(null=True)
     productImages=models.TextField(default='',null=True,blank=True)
     productUnit=models.CharField(max_length=254,null=True)
-    productQunatity=models.CharField(max_length=254,null=True)
+    productQuantity=models.CharField(max_length=254,null=True)
     initialBidPrice=models.DecimalField(max_digits=15,decimal_places=2)
     
                  

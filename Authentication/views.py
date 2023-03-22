@@ -32,10 +32,16 @@ def farmerSignUp(request):
      
         print(serializer.is_valid(raise_exception=True))
         if serializer.is_valid(raise_exception=True):
-            farmer=serializer.save()
-            token=RefreshToken.for_user(user)
+            serializer.save()
+            farmer=serializer.data
+            print(farmer)   
+            
+            token=AccessToken.for_user(user)
+            print(token)
+            farmer.update({"token":str(token)})  
+            
             print(f"this is user {user.id}")
-            return Response({"token":str(token.access_token) ,"id":user.id},status=status.HTTP_201_CREATED)
+            return Response( farmer,status=status.HTTP_201_CREATED)
    except Exception as e:
        print(e)
        return Response(e.args,status=status.HTTP_400_BAD_REQUEST)   
@@ -97,7 +103,7 @@ def addProductToInventory(request):
    data['initialBidPrice']=request.POST.get('initialBidPrice')
    print(f"ininit {data['initialBidPrice']}")
    data['productUnit']=request.POST.get('productUnit')
-   data['productQunatity']=request.POST.get('productQunatity')  
+   data['productQuantity']=request.POST.get('productQuantity')  
    data['productId']=product.pk
    print(data["productName"])
    data['productDescription']=request.POST.get('productDescription')
@@ -128,6 +134,7 @@ def addProductToInventory(request):
  except Exception as e:
    print(e)
    return Response(e.args,status=status.HTTP_400_BAD_REQUEST)    
+  
   
     
 @api_view(["POST"]) 
@@ -255,7 +262,9 @@ def phoneNumberCheck(request):
         newRes.update(vendordata)
         return  Response(newRes,status=status.HTTP_200_OK) 
     
-      except : 
+      except Exception as e:
+            print(e.args) 
+        
             return  Response({"exist":False},status=status.HTTP_200_OK) 
          
 

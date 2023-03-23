@@ -69,10 +69,10 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.mysql',
-		'NAME': 'veGrow' ,    
-		'USER': 'visionaries',
-		'PASSWORD': 'password',
-		'HOST':'localhost',       
+		'NAME':'u642491936_vegrow',    
+		'USER': 'u642491936_vegrow',
+		'PASSWORD': '6oTA5~H@R',
+		'HOST':'89.117.188.154',       
 		'PORT':'3306',   
 	}
 }    

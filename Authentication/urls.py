@@ -14,6 +14,7 @@ urlpatterns = [
     path('vendorLogin/',views.vendorLogin,name="vendorLogin"),
     path("addVendorLocationDetails",views.addVendorLocationDetails),
     path("specificVendorData/",views.specificVendorData),
+    path("searchProductsForVendor/",views.searchProductsForVendor),
  
     path('insertAllProductList/',views.insertInAllProducts),
     path('deleteAllproductList/',views.deleteAllProductList),

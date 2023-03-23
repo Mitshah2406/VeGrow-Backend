@@ -84,6 +84,32 @@ class ProductInventory(models.Model):
     productUnit=models.CharField(max_length=254,null=True)
     productQuantity=models.CharField(max_length=254,null=True)
     initialBidPrice=models.DecimalField(max_digits=15,decimal_places=2)
+    productQuantityLeftInInventory=models.CharField(max_length=254,null=True)
+    status=models.CharField(max_length=254,default="listed")
+    
+    
+class ProductBidding(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4)
+    bidQuantity=models.CharField(max_length=254)
+    bitAmount=models.DecimalField(max_digits=15,decimal_places=2)
+    invetoryId=models.ForeignKey(ProductInventory,on_delete=models.PROTECT)
+    vendorId=models.ForeignKey(Vendor,on_delete=models.PROTECT)
+    bidStatus=models.CharField(max_length=254,default="placed")
+      
+    
+      
+        
+    
+class PurchaseTransactions(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4)
+    buyer=models.ForeignKey(Vendor,on_delete=models.PROTECT)
+    totalPurchasePrice=models.DecimalField(max_digits=15,decimal_places=2)
+    inventoryId=models.ForeignKey(ProductInventory,on_delete=models.PROTECT)
+    purchaseQuantity=models.CharField(max_length=254)
+    dateTime=models.DateTimeField(auto_now_add=True)
+    
+        
+    
     
                  
                  

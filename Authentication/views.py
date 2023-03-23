@@ -243,7 +243,23 @@ def specificVendorData(request):
 def tp(request):
     return Response("hello")     
   
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated]) 
+def searchProductsForVendor(request): 
+ try:
   
+  data=json.loads(request.body)
+  print(data)
+  productList=ProductInventory.objects.filter(productName__istartswith=data['search'])
+  productList=productInventorySerializer(productList,many=True).data
+  print(productList)
+  return Response(productList,status=status.HTTP_200_OK)
+ except Exception as e:
+   print(e.args)
+   return Response(e.args,status=status.HTTP_400_BAD_REQUEST) 
+    
+   
   
   
 @api_view(["POST"])

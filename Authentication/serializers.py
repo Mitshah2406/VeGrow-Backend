@@ -72,6 +72,7 @@ class productInventorySerializer(serializers.ModelSerializer):
         product.productExpiryDate=validated_data['productExpiryDate']
         product.productUnit=validated_data['productUnit']
         product.productQuantity=validated_data['productQuantity']
+        product.productQuantityLeftInInventory=validated_data['productQuantity']
         if 'productDescription' in validated_data:
             product.productDescription=validated_data['productDescription']
         if 'productImages' in validated_data:

@@ -67,9 +67,13 @@ def specificFarmerData(request):
   data=json.loads(request.body)
   farmer=Farmers.objects.get(id=data['id'])
   serializer=farmerSerializer(farmer).data
+  print(serializer['location'])
+  if not serializer["location"]:
+    del serializer["location"]
   return Response(serializer,status=status.HTTP_200_OK)
  except Exception as e:
    return Response(e.args,status=status.HTTP_400_BAD_REQUEST) 
+ 
     
 @api_view(["POST"])
 def farmerLogin(request):
@@ -182,14 +186,26 @@ def vendorSignUp(request):
         print(data)
         serializer=vendorSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            token=RefreshToken.for_user(user)
-            return Response({"token":str(token.access_token) },status=status.HTTP_201_CREATED)
+           vendor=serializer.save()
+           data=vendorSerializer(vendor).data
+           token=RefreshToken.for_user(user)
+           data.update({"token":str(token.access_token) ,"role":"vendor"})
+           return Response(data,status=status.HTTP_201_CREATED)
   except Exception as e:
       print(e)
       return Response(e.args,status=status.HTTP_400_BAD_REQUEST)      
               
-
+@api_view(["POST"])  
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])  
+def addVendorLocationDetails(request):
+ try:
+  data=json.loads(request.body)
+  vendor=Vendor.objects.filter(id=data['id']).update(location=data['location'])
+  return Response("done",status=status.HTTP_200_OK)  
+ except Exception as e:
+  print(e.args)
+  return Response(e.args,status=status.HTTP_400_BAD_REQUEST)  
     
 @api_view(["POST"])    
 def vendorLogin(request):
@@ -206,7 +222,20 @@ def vendorLogin(request):
    except Exception as e:
        return Response(e.args,status=status.HTTP_204_NO_CONTENT)  
   
-  
+@api_view(["POST"])  
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])   
+def specificVendorData(request):
+ try: 
+  data=json.loads(request.body)
+  farmer=Vendor.objects.get(id=data['id'])
+  serializer=vendorSerializer(farmer).data
+  print(serializer['location'])
+  if not serializer["location"]:
+    del serializer["location"]
+  return Response(serializer,status=status.HTTP_200_OK)
+ except Exception as e:
+   return Response(e.args,status=status.HTTP_400_BAD_REQUEST)   
      
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])
@@ -287,7 +316,13 @@ def insertInAllProducts(request):
     if serializer.is_valid(raise_exception=True):
       serializer.save()
       print(x)
-  return Response(products)      
+  return Response(products)   
+
+
+@api_view(["POST"])
+def deleteAllProductList(request):
+  res=AllProductList.objects.all().delete()
+  return Response(res)   
   
 
 

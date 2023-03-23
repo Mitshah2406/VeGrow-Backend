@@ -12,8 +12,11 @@ urlpatterns = [
     path("getMyListedProductList/",views.getMyListedProductList),
     path('vendorSignUp/',views.vendorSignUp,name="vendorSignUp"),
     path('vendorLogin/',views.vendorLogin,name="vendorLogin"),
+    path("addVendorLocationDetails",views.addVendorLocationDetails),
+    path("specificVendorData/",views.specificVendorData),
  
     path('insertAllProductList/',views.insertInAllProducts),
+    path('deleteAllproductList/',views.deleteAllProductList),
     
     
     path('tp/',views.tp,name="vendorLogin"),   

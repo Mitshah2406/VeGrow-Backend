@@ -296,12 +296,13 @@ def inventoryProductListForVendor(request):
   try:   
     
     productList=list(ProductInventory.objects.all().values_list("productName"))    
-    print() 
+    print(type(productList)) 
     productList1=[]
     for x in productList:
       productList1.append(x[0])
-      
-    return Response(productList1,status=status.HTTP_200_OK)
+    myList = {"list":sorted(set(productList1))}
+    
+    return Response(myList,status=status.HTTP_200_OK)
   except Exception as e:
     print(e.args)
     return Response(e.args,status=status.HTTP_200_OK)
@@ -325,10 +326,11 @@ def specificProductDetailsForVendor(request):
    print(productData["inventoryId"])
    bidData=ProductBidding.objects.filter(inventoryId=productData['inventoryId']).order_by('-bidAmount')
    bidData=ProductBiddingSerializer(bidData,many=True).data
-   print(bidData)  
+   print(bidData)     
    productData["previousBids"]=bidData
    
    productData.update(farmerData)
+   del productData['farmerLocation']
    return Response(productData,status=status.HTTP_200_OK)
  except Exception as e:
    print(e.args)
@@ -355,17 +357,27 @@ def productBidList(request):
   data=json.loads(request.body)
   filter_=data['filter']
   if filter_=="latest":
-   productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).order_by('-dateTime')
+   productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).exclude(bidStatus="rejected").order_by('-dateTime')
+    
+   
    productBids=ProductBiddingSerializer(productBids,many=True).data
+   
    return Response(productBids,status=status.HTTP_200_OK)
   elif filter_=="highestPrice":
-    productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).order_by('-bidAmount')
+    productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).exclude(bidStatus="rejected").order_by('-bidAmount')
     productBids=ProductBiddingSerializer(productBids,many=True).data
     return Response(productBids,status=status.HTTP_200_OK)
   elif filter_=="highestQuantity":
-    productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).order_by('-bidQuantity')
+    productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).exclude(bidStatus="rejected").order_by('-bidQuantity')
     productBids=ProductBiddingSerializer(productBids,many=True).data
     return Response(productBids,status=status.HTTP_200_OK)
+  elif filter_=="All": 
+    productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).exclude(bidStatus="rejected").order_by('-dateTime')
+    productBids=ProductBiddingSerializer(productBids,many=True).data
+    rejected=ProductBidding.objects.filter(bidStatus="rejected").order_by('-dateTime')
+    rejected=ProductBiddingSerializer(rejected,many=True).data
+    data=productBids+rejected
+    return Response(data,status=status.HTTP_200_OK)
     
     
 
@@ -418,8 +430,13 @@ def bidOnProduct(request):
 def farmerAcceptOrRejectBid(request):
  try: 
   data=json.loads(request.body)
-  product=ProductBidding.objects.filter(bidId=data['bidId']).update(bidStatus="rejected")
- except Exception as e:
+  if data['bidStatus']=="rejected":
+   product=ProductBidding.objects.filter(bidId=data['bidId']).update(bidStatus="rejected")
+  else:
+    productBid=ProductBidding.objects.filter(bidId=data['bidId']).update(bidStatus="Accepted")
+    status=ProductInventory.objects.filter(productId=productBid['inventoryId']).update(status="confirmed")
+  return Response("done",status=status.HTTP_200_OK)  
+ except Exception as e:  
    print(e.args)
    return Response(e.args,status=status.HTTP_400_BAD_REQUEST) 
   

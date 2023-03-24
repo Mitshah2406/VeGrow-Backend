@@ -21,6 +21,7 @@ urlpatterns = [
     path("topfiveProductFromInventory/",views.topfiveProductFromInventory),
     path("bidOnProduct/",views.bidOnProduct),
     path("productBidList/",views.productBidList),
+    path("farmerAcceptOrRejectBid/",views.farmerAcceptOrRejectBid),
     
     path('insertAllProductList/',views.insertInAllProducts),
     path('deleteAllproductList/',views.deleteAllProductList),

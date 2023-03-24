@@ -321,7 +321,20 @@ def specificProductDetailsForVendor(request):
  except Exception as e:
    print(e.args)
    return Response(e.args,status=status.HTTP_400_BAD_REQUEST)
+    
 
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated]) 
+def topfiveProductFromInventory(request):
+  try:  
+    productList=ProductInventory.objects.all().order_by("-productListedDate")[:5]
+    productList=productInventorySerializer(productList,many=True).data
+    
+    return Response(productList,status=status.HTTP_200_OK)
+  except Exception as e:
+    print(e.args) 
+    return Response(e.args,status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])

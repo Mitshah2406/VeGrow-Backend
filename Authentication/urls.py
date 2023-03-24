@@ -18,6 +18,7 @@ urlpatterns = [
     path("specificProductDetailsForVendor/",views.specificProductDetailsForVendor),
     path("inventoryProductListForVendor/",views.inventoryProductListForVendor),
     # path("specificProductDetailsForFarmers",views.sp),
+    path("topfiveProductFromInventory/",views.topfiveProductFromInventory),
     path("bidOnProduct/",views.bidOnProduct),
     path("productBidList/",views.productBidList),
     

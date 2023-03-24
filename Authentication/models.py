@@ -95,7 +95,8 @@ class ProductInventory(models.Model):
     
     
 class ProductBidding(models.Model):
-    id=models.UUIDField(primary_key=True,default=uuid.uuid4)
+    
+    bidId=models.UUIDField(primary_key=True,default=uuid.uuid4)
     bidQuantity=models.CharField(max_length=254)
     bidAmount=models.DecimalField(max_digits=15,decimal_places=2)
     inventoryId=models.ForeignKey(ProductInventory,on_delete=models.PROTECT)

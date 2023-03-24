@@ -149,16 +149,27 @@ def addProductToInventory(request):
   
   
     
-@api_view(["POST"]) 
+@api_view(["POST"])   
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def getMyListedProductList(request):   
  try:     
-  data=json.loads(request.body)
-  
-  productList=ProductInventory.objects.filter(farmerId=data['farmerId'])
-  data=productInventorySerializer(productList,many=True).data
-  return Response(data,status=status.HTTP_200_OK)
+    data=json.loads(request.body)
+ 
+    filter_=data["filter"]
+    if filter_=="pending":
+     productList=ProductInventory.objects.filter(farmerId=data['farmerId'],status="listed")
+    elif filter_=="bidded":
+      productList=ProductInventory.objects.filter(farmerId=data['farmerId'],status="bidded")
+    elif filter_=="confrimed":
+      productList=ProductInventory.objects.filter(farmerId=data['farmerId'],status="confrimed")
+    elif filter_=="All":
+     productList=ProductInventory.objects.filter(farmerId=data['farmerId'])
+        
+
+    data=productInventorySerializer(productList,many=True).data
+    print(data)
+    return Response(data,status=status.HTTP_200_OK)
  except Exception as e:
     print(e.args)
     return Response(e.args,status=status.HTTP_400_BAD_REQUEST)
@@ -314,7 +325,7 @@ def specificProductDetailsForVendor(request):
    bidData=ProductBidding.objects.filter(inventoryId=productData['inventoryId']).order_by('-bidAmount')
    bidData=ProductBiddingSerializer(bidData,many=True).data
    print(bidData)  
-   productData["previousBis"]=bidData
+   productData["previousBids"]=bidData
    
    productData.update(farmerData)
    return Response(productData,status=status.HTTP_200_OK)
@@ -383,12 +394,13 @@ def bidOnProduct(request):
    updateBid.bidAmount=data['bidAmount']
    updateBid.bidQuantity=data['bidQuantity']
    updateBid.save()
-   ProductInventory.objects.filter(inventoryId=data['inventoryId']).update(currentBidPrice=updateBid.bidAmount)
+   ProductInventory.objects.filter(inventoryId=data['inventoryId']).update(currentBidPrice=updateBid.bidAmount,status="bidded")
    return Response("done",status=status.HTTP_200_OK)
   except ObjectDoesNotExist as e:
      bidSrializer=ProductBiddingSerializer(data=data)
      if bidSrializer.is_valid(raise_exception=True):
         bid=bidSrializer.save()
+        ProductInventory.objects.filter(inventoryId=data['inventoryId']).update(currentBidPrice=data['bidAmount'],status="bidded")  
       
         return Response("done",status=status.HTTP_200_OK)
     
@@ -398,6 +410,19 @@ def bidOnProduct(request):
   
      return Response(e.args,status=status.HTTP_400_BAD_REQUEST)     
   
+  
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])   
+def farmerAcceptOrRejectBid(request):
+ try: 
+  data=json.loads(request.body)
+  product=ProductBidding.objects.filter(bidId=data['bidId']).update(bidStatus="rejected")
+ except Exception as e:
+   print(e.args)
+   return Response(e.args,status=status.HTTP_400_BAD_REQUEST) 
+  
+    
 
 # @api_view(["POST"])
 # @authentication_classes([JWTAuthentication])

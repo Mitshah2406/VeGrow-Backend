@@ -18,6 +18,7 @@ urlpatterns = [
  
     path('insertAllProductList/',views.insertInAllProducts),
     path('deleteAllproductList/',views.deleteAllProductList),
+    path("deleteSpecificUser/",views.deleteSpecificUser),
     
     
     path('tp/',views.tp,name="vendorLogin"),   

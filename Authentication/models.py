@@ -82,10 +82,12 @@ class ProductInventory(models.Model):
     productExpiryDate=models.DateField(null=True)
     productImages=models.TextField(default='',null=True,blank=True)
     productUnit=models.CharField(max_length=254,null=True)
-    productQuantity=models.CharField(max_length=254,null=True)
+    productQuantity=models.IntegerField(null=True)
     initialBidPrice=models.DecimalField(max_digits=15,decimal_places=2)
-    productQuantityLeftInInventory=models.CharField(max_length=254,null=True)
+    productQuantityLeftInInventory=models.IntegerField(null=True)
     status=models.CharField(max_length=254,default="listed")
+    farmerLocation=models.JSONField(default=dict,null=True)
+    currentBidPrice=models.DecimalField(max_digits=15,decimal_places=2,null=True)
     
     
 class ProductBidding(models.Model):

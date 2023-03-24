@@ -103,6 +103,7 @@ def addProductToInventory(request):
    print(request.FILES.getlist('images'))   
    print(request.POST.get('productId'))
    product=AllProductList.objects.get(id=request.POST.get('productId'))
+   farmer=Farmers.objects.get(id=request.POST.get('farmerId'))
    data['productName']=product.productName
    data['initialBidPrice']=request.POST.get('initialBidPrice')
    print(f"ininit {data['initialBidPrice']}")
@@ -113,7 +114,9 @@ def addProductToInventory(request):
    data['productDescription']=request.POST.get('productDescription')
    data['productExpiryDate']=request.POST.get('productExpiryDate')
    
-   data['farmerId']=request.POST.get('farmerId')
+   
+   data['farmerId']=farmer.id
+   data['farmerLocation']=farmer.location
       
    imagelist=''
    images=request.FILES.getlist('images')
@@ -250,9 +253,36 @@ def searchProductsForVendor(request):
  try:
   
   data=json.loads(request.body)
-  print(data)
+  vendor=Vendor.objects.get(id=data['id'])
+  filter_=data['filter']
+  
+  
   productList=ProductInventory.objects.filter(productName__istartswith=data['search'])
   productList=productInventorySerializer(productList,many=True).data
+  data=productInventorySerializer.harvasineFilter(productList=productList,vendorLocation=vendor.location,filter=filter_)
+  
+  return Response(data,status=status.HTTP_200_OK)
+  # elif filter_=="lowestToHighestQunatity":
+  #     print("lowestToHighestQunatity")
+  #     productList=ProductInventory.objects.filter(productName__istartswith=data['search']).order_by("productQuantityLeftInInventory")
+  #     productList=productInventorySerializer(productList,many=True).data
+    
+  #     return Response(productList,status=status.HTTP_200_OK)  
+  # elif filter_=="highestToLowestQuantity":
+  #     print("highestToLowestQuantity")
+  #     productList=ProductInventory.objects.filter(productName__istartswith=data['search']).order_by("-productQuantityLeftInInventory")
+  #     productList=productInventorySerializer(productList,many=True).data
+  #     return Response(productList,status=status.HTTP_200_OK)  
+  # elif filter_=="lowestToHighestPrice":
+  #     productList=ProductInventory.objects.filter(productName__istartswith=data['search']).order_by("-productQuantityLeftInInventory")
+  #     productList=productInventorySerializer(productList,many=True).data
+  #     return Response(productList,status=status.HTTP_200_OK) 
+       
+          
+  
+ 
+    
+   
   print(productList)
   return Response(productList,status=status.HTTP_200_OK)
  except Exception as e:
@@ -340,6 +370,11 @@ def deleteAllProductList(request):
   res=AllProductList.objects.all().delete()
   return Response(res)   
   
+@api_view(["POST"])
+def deleteSpecificUser(request):
+  data=json.loads(request.body)
+  res=userAuth.objects.get(id=data['id']).delete()
+  return Response(res)  
 
 
 

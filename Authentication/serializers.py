@@ -70,6 +70,7 @@ class productInventorySerializer(serializers.ModelSerializer):
     def create(self, validated_data):  
         product=ProductInventory.objects.create(farmerId=validated_data['farmerId'],productId=validated_data["productId"],initialBidPrice=validated_data['initialBidPrice'])
         product.productName=validated_data['productName']
+        product.currentBidPrice=validated_data['initialBidPrice']
         product.productExpiryDate=validated_data['productExpiryDate']
         product.productUnit=validated_data['productUnit']
         product.productQuantity=validated_data['productQuantity']
@@ -96,7 +97,7 @@ class productInventorySerializer(serializers.ModelSerializer):
      r = 6371 # Radius of earth in kilometers. Use 3956 for miles. Determines return value units.
      return c * r
     
-    def distanceSorting(self,productList,vendorLocation):
+    def distanceCalculating(self,productList,vendorLocation):
 
         for y,x in enumerate(productList):
               x=dict(x)
@@ -106,7 +107,7 @@ class productInventorySerializer(serializers.ModelSerializer):
               productList[y]['distanceFromVendor']=distance
                       
               print(productList[y]['distanceFromVendor'],"  ",x['productDescription'])
-        return sorted(productList, key=lambda x: x['distanceFromVendor'])
+        return productList
               
  
      
@@ -117,64 +118,23 @@ class productInventorySerializer(serializers.ModelSerializer):
         print(vendorLocation)
         
   
-        if "distance" in filter and "highestQuantity" in filter and "lowestPrice" in filter:
-            # distance Sorting
-             sortedList=self.distanceSorting(self=self,productList=productList,vendorLocation=vendorLocation)
-        # HigestQuantity
+        
+        
+       
+        if filter== "distance" :
+            sortedList=self.distanceCalculating(self=self,productList=productList,vendorLocation=vendorLocation)
+            return sorted(sortedList, key=lambda x: x['distanceFromVendor'])
+        elif filter== "highestQuantity":
+             sortedList=self.distanceCalculating(self=self,productList=productList,vendorLocation=vendorLocation)
              sortedList=sorted(sortedList,key=lambda x:x['productQuantityLeftInInventory'],reverse=True)
-        #lowestPrice
-             sortedList=sorted(sortedList,key=lambda x:x['currentBidPrice'])
              return sortedList
-        
-        elif "distance" in filter and "highestQuantity" in filter:
-              sortedList=self.distanceSorting(self=self,productList=productList,vendorLocation=vendorLocation)
-              #higestQunatity
-              sortedList=sorted(sortedList,key=lambda x:x['productQuantityLeftInInventory'],reverse=True)
-              return sortedList
-        elif "distance" in filter and "lowestPrice" in filter:
-            sortedList=self.distanceSorting(self=self,productList=productList,vendorLocation=vendorLocation)
-            sortedList=sorted(sortedList,key=lambda x:x['currentBidPrice'])
-            return sortedList
-        elif "highestQuantity" in filter and "lowestPrice" in filter:
-             sortedList=sorted(productList,key=lambda x:x['productQuantityLeftInInventory'],reverse=True)
-        #lowestPrice
-             sortedList=sorted(sortedList,key=lambda x:x['currentBidPrice'])
-             return sortedList
-        elif len(filter)==1 and "distance" in filter:
-            sortedList=self.distanceSorting(self=self,productList=productList,vendorLocation=vendorLocation)
-            return sortedList
-        elif len(filter)==1 and "highestQuantity" in filter:
-             sortedList=sorted(productList,key=lambda x:x['productQuantityLeftInInventory'],reverse=True)
-             return sortedList
-        elif len(filter)==1 and "lowestPrice" in filter: 
-             sortedList=sorted(productList,key=lambda x:x['currentBidPrice'])
+        elif filter=="lowestPrice" : 
+             print("ddddddd")
+             sortedList=self.distanceCalculating(self=self,productList=productList,vendorLocation=vendorLocation)
+             sortedList=sorted(sortedList,key=lambda x:float(x['currentBidPrice']))
              return sortedList
              
             
-            
-            
-            
-              
-              
-            
-        
-            
-            
-        
-           
-      
-        # for y,x in enumerate(productList):
-            
-        #       x=dict(x)
-            
-        #       distance=self.haversine(x["farmerLocation"]['lon'],x["farmerLocation"]['lat'],vendorLocation['lon'],vendorLocation['lat'])
-             
-        #       productList[y]['distanceFromVendor']=distance
-                      
-        #       print(productList[y]['distanceFromVendor'],"  ",x['productDescription'])
-            
-        # sortedList=sorted(productList, key=lambda x: x['distanceFromVendor'])
-        # return sortedList
         
         
         

@@ -139,6 +139,7 @@ REST_FRAMEWORK = {
     )
 
 }
+TIME_ZONE =  'Asia/Kolkata'
 
 from datetime import timedelta
 ...

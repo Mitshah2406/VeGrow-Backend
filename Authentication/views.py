@@ -1,4 +1,9 @@
+import zoneinfo
 from django.conf import settings
+import pprint
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
+
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,authentication_classes,permission_classes,parser_classes
 from rest_framework_simplejwt.tokens import RefreshToken,AccessToken
@@ -9,8 +14,8 @@ from django.core.files.base import ContentFile
 from rest_framework.parsers import MultiPartParser ,FormParser,JSONParser
 import uuid
 from PIL import Image
-from .serializers import farmerSerializer,userAuthSerializer,vendorSerializer,productInventorySerializer,AllProductListSerializer
-from .models import Farmers,Vendor,userAuth,ProductInventory,AllProductList     
+from .serializers import farmerSerializer,userAuthSerializer,vendorSerializer,productInventorySerializer,AllProductListSerializer,ProductBiddingSerializer,PurchaseTransactionsSerializer
+from .models import Farmers,Vendor,userAuth,ProductInventory,AllProductList,ProductBidding,PurchaseTransactions     
 from rest_framework import status
 import random
 
@@ -246,50 +251,145 @@ def specificVendorData(request):
 def tp(request):
     return Response("hello")     
   
+  
+  
+  
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated]) 
-def searchProductsForVendor(request): 
+def searchProductsForVendorFilter(request): 
  try:
-  
   data=json.loads(request.body)
-  vendor=Vendor.objects.get(id=data['id'])
-  filter_=data['filter']
-  
-  
-  productList=ProductInventory.objects.filter(productName__istartswith=data['search'])
+  vendor=Vendor.objects.get(id=data['vendorId'])
+  # 
+  if "filter" in data:
+    filter_=data['filter']
+  else:
+    data['filter']="distance"
+    filter_=data['filter']
+  productList=ProductInventory.objects.filter(productName__istartswith=data['productName'])
   productList=productInventorySerializer(productList,many=True).data
   data=productInventorySerializer.harvasineFilter(productList=productList,vendorLocation=vendor.location,filter=filter_)
   
   return Response(data,status=status.HTTP_200_OK)
-  # elif filter_=="lowestToHighestQunatity":
-  #     print("lowestToHighestQunatity")
-  #     productList=ProductInventory.objects.filter(productName__istartswith=data['search']).order_by("productQuantityLeftInInventory")
-  #     productList=productInventorySerializer(productList,many=True).data
-    
-  #     return Response(productList,status=status.HTTP_200_OK)  
-  # elif filter_=="highestToLowestQuantity":
-  #     print("highestToLowestQuantity")
-  #     productList=ProductInventory.objects.filter(productName__istartswith=data['search']).order_by("-productQuantityLeftInInventory")
-  #     productList=productInventorySerializer(productList,many=True).data
-  #     return Response(productList,status=status.HTTP_200_OK)  
-  # elif filter_=="lowestToHighestPrice":
-  #     productList=ProductInventory.objects.filter(productName__istartswith=data['search']).order_by("-productQuantityLeftInInventory")
-  #     productList=productInventorySerializer(productList,many=True).data
-  #     return Response(productList,status=status.HTTP_200_OK) 
-       
-          
-  
- 
-    
-   
-  print(productList)
-  return Response(productList,status=status.HTTP_200_OK)
  except Exception as e:
    print(e.args)
    return Response(e.args,status=status.HTTP_400_BAD_REQUEST) 
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated]) 
+def inventoryProductListForVendor(request):
+  try:   
     
+    productList=list(ProductInventory.objects.all().values_list("productName"))    
+    print() 
+    productList1=[]
+    for x in productList:
+      productList1.append(x[0])
+      
+    return Response(productList1,status=status.HTTP_200_OK)
+  except Exception as e:
+    print(e.args)
+    return Response(e.args,status=status.HTTP_200_OK)
+    
+
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated]) 
+def specificProductDetailsForVendor(request):  
+ try: 
+   data=json.loads(request.body)
+   vendor=Vendor.objects.get(id=data['vendorId'])
+   product=ProductInventory.objects.get(inventoryId=data['productId'])
+   farmer=Farmers.objects.get(id=product.farmerId)
+   distance=productInventorySerializer.calculateSingleDistance(lat1=farmer.location['lat'],lon1=farmer.location['lon'],lat2=vendor.location['lat'],lon2=vendor.location['lon'])
+   farmerData={"farmerName":farmer.fName+" "+farmer.lName,"distance":distance}
+   productData=productInventorySerializer(product).data
+   print("inventoryId")
+   print(productData["inventoryId"])
+   bidData=ProductBidding.objects.filter(inventoryId=productData['inventoryId']).order_by('-bidAmount')
+   bidData=ProductBiddingSerializer(bidData,many=True).data
+   print(bidData)  
+   productData["previousBis"]=bidData
    
+   productData.update(farmerData)
+   return Response(productData,status=status.HTTP_200_OK)
+ except Exception as e:
+   print(e.args)
+   return Response(e.args,status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated]) 
+def productBidList(request):
+  data=json.loads(request.body)
+  filter_=data['filter']
+  if filter_=="latest":
+   productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).order_by('-dateTime')
+   productBids=ProductBiddingSerializer(productBids,many=True).data
+   return Response(productBids,status=status.HTTP_200_OK)
+  elif filter_=="highestPrice":
+    productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).order_by('-bidAmount')
+    productBids=ProductBiddingSerializer(productBids,many=True).data
+    return Response(productBids,status=status.HTTP_200_OK)
+  elif filter_=="highestQuantity":
+    productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).order_by('-bidQuantity')
+    productBids=ProductBiddingSerializer(productBids,many=True).data
+    return Response(productBids,status=status.HTTP_200_OK)
+    
+    
+
+def specificProductDetailsForFarmer(request):
+  try:
+    data=json.loads(request.body)
+    product=ProductInventory.objects.get(inventoryId=data['inventoryId'],farmerId=data['farmerId'])
+    productdata=productInventorySerializer(productdata).data
+    
+  except Exception as e:
+    print(e.args)  
+
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])     
+def bidOnProduct(request): 
+ try: 
+  data=json.loads(request.body)
+  data['dateTime']=timezone.localtime(timezone.now())
+  print(data)
+  try:
+   updateBid=ProductBidding.objects.get(inventoryId=data['inventoryId'],vendorId=data['vendorId'])
+   updateBid.dateTime=timezone.localtime(timezone.now())
+   print(timezone.localtime(timezone.now()))
+  #  print(zoneinfo.available_timezones())
+   updateBid.bidAmount=data['bidAmount']
+   updateBid.bidQuantity=data['bidQuantity']
+   updateBid.save()
+   ProductInventory.objects.filter(inventoryId=data['inventoryId']).update(currentBidPrice=updateBid.bidAmount)
+   return Response("done",status=status.HTTP_200_OK)
+  except ObjectDoesNotExist as e:
+     bidSrializer=ProductBiddingSerializer(data=data)
+     if bidSrializer.is_valid(raise_exception=True):
+        bid=bidSrializer.save()
+      
+        return Response("done",status=status.HTTP_200_OK)
+    
+  
+ except Exception as e:
+ 
+  
+     return Response(e.args,status=status.HTTP_400_BAD_REQUEST)     
+  
+
+# @api_view(["POST"])
+# @authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated]) 
+# def     
   
   
 @api_view(["POST"])

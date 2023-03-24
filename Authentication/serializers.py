@@ -1,6 +1,6 @@
 import pprint
 from rest_framework import serializers
-from .models import Farmers,Vendor,userAuth,ProductInventory,AllProductList
+from .models import Farmers,Vendor,userAuth,ProductInventory,AllProductList,ProductBidding,PurchaseTransactions
 from math import radians, cos, sin, asin, sqrt
 
 class farmerSerializer(serializers.ModelSerializer):
@@ -61,6 +61,16 @@ class AllProductListSerializer(serializers.ModelSerializer):
        fields="__all__"
  
  
+class ProductBiddingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=ProductBidding
+        fields="__all__"
+ 
+class PurchaseTransactionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=PurchaseTransactions
+        fields="__all__"       
+    
  
        
 class productInventorySerializer(serializers.ModelSerializer):
@@ -112,15 +122,15 @@ class productInventorySerializer(serializers.ModelSerializer):
  
      
     @classmethod
+    def calculateSingleDistance(self,lon1,lat1,lon2,lat2):
+        return self.haversine(lon1=lon1,lat1=lat1,lon2=lon2,lat2=lat2)
+     
+    @classmethod
     def harvasineFilter(self,productList,vendorLocation,filter):
         print(type(productList))  
         print(len(productList))
         print(vendorLocation)
         
-  
-        
-        
-       
         if filter== "distance" :
             sortedList=self.distanceCalculating(self=self,productList=productList,vendorLocation=vendorLocation)
             return sorted(sortedList, key=lambda x: x['distanceFromVendor'])

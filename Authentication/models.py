@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager,AbstractBaseUser
 from phonenumber_field.modelfields import PhoneNumberField
 import uuid
+import pytz 
+from django.utils import timezone
 class userAuthManager(BaseUserManager):
     # def create_superuser(self, id, password=None ):
     
@@ -55,6 +57,7 @@ class Vendor(models.Model):
     location=models.JSONField(default=dict,null=True)    
     phone=PhoneNumberField(region='IN',null=True)
     email=models.EmailField(null=True)
+    VendorRatings=models.CharField(max_length=254,null=True)
     
 class Farmers(models.Model):
     id=models.OneToOneField(userAuth,on_delete=models.CASCADE,primary_key=True)
@@ -63,6 +66,7 @@ class Farmers(models.Model):
     location=models.JSONField(default=dict,null=True) 
     phone=PhoneNumberField(region='IN',null=True)
     email=models.EmailField(null=True)
+    farmerRatings=models.CharField(max_length=254,null=True)
     
   
   
@@ -93,10 +97,11 @@ class ProductInventory(models.Model):
 class ProductBidding(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4)
     bidQuantity=models.CharField(max_length=254)
-    bitAmount=models.DecimalField(max_digits=15,decimal_places=2)
-    invetoryId=models.ForeignKey(ProductInventory,on_delete=models.PROTECT)
+    bidAmount=models.DecimalField(max_digits=15,decimal_places=2)
+    inventoryId=models.ForeignKey(ProductInventory,on_delete=models.PROTECT)
     vendorId=models.ForeignKey(Vendor,on_delete=models.PROTECT)
     bidStatus=models.CharField(max_length=254,default="placed")
+    dateTime=models.DateTimeField(auto_now_add=True)
       
     
       

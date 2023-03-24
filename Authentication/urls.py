@@ -14,8 +14,13 @@ urlpatterns = [
     path('vendorLogin/',views.vendorLogin,name="vendorLogin"),
     path("addVendorLocationDetails",views.addVendorLocationDetails),
     path("specificVendorData/",views.specificVendorData),
-    path("searchProductsForVendor/",views.searchProductsForVendor),
- 
+    path("searchProductsForVendorFilter/",views.searchProductsForVendorFilter),
+    path("specificProductDetailsForVendor/",views.specificProductDetailsForVendor),
+    path("inventoryProductListForVendor/",views.inventoryProductListForVendor),
+    # path("specificProductDetailsForFarmers",views.sp),
+    path("bidOnProduct/",views.bidOnProduct),
+    path("productBidList/",views.productBidList),
+    
     path('insertAllProductList/',views.insertInAllProducts),
     path('deleteAllproductList/',views.deleteAllProductList),
     path("deleteSpecificUser/",views.deleteSpecificUser),

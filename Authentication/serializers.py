@@ -115,8 +115,10 @@ class productInventorySerializer(serializers.ModelSerializer):
               distance=self.haversine(x["farmerLocation"]['lon'],x["farmerLocation"]['lat'],vendorLocation['lon'],vendorLocation['lat'])
              
               productList[y]['distanceFromVendor']=distance
+              del productList[y]['farmerLocation']
                       
               print(productList[y]['distanceFromVendor'],"  ",x['productDescription'])
+              
         return productList
               
  

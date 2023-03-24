@@ -282,6 +282,7 @@ def searchProductsForVendorFilter(request):
   productList=productInventorySerializer(productList,many=True).data
   data=productInventorySerializer.harvasineFilter(productList=productList,vendorLocation=vendor.location,filter=filter_)
   
+  
   return Response(data,status=status.HTTP_200_OK)
  except Exception as e:
    print(e.args)

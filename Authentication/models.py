@@ -73,8 +73,9 @@ class Farmers(models.Model):
 class AllProductList(models.Model):
     id=models.AutoField(primary_key=True)
     productName=models.CharField(max_length=254,unique=True)
-    imgage=models.ImageField(upload_to="farmers/allProductList",null=True)  
-    productMarketPrice=models.DecimalField(max_digits=10,decimal_places=2)           
+    productImage=models.TextField(null=True) 
+    productMarketPrice=models.DecimalField(max_digits=10,decimal_places=2)    
+    productCategory=models.CharField(max_length=254,null=True)       
              
 class ProductInventory(models.Model):
     productId=models.ForeignKey(AllProductList,on_delete=models.PROTECT)
@@ -103,6 +104,7 @@ class ProductBidding(models.Model):
     vendorId=models.ForeignKey(Vendor,on_delete=models.PROTECT)
     bidStatus=models.CharField(max_length=254,default="placed")
     dateTime=models.DateTimeField(auto_now_add=True)
+    vendorName=models.CharField(null=True,max_length=254)
       
     
       

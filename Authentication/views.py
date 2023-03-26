@@ -108,6 +108,7 @@ def addProductToInventory(request):
    print(request.FILES.getlist('images'))   
    print(request.POST.get('productId'))
    product=AllProductList.objects.get(id=request.POST.get('productId'))
+   
    farmer=Farmers.objects.get(id=request.POST.get('farmerId'))
    data['productName']=product.productName
    data['initialBidPrice']=request.POST.get('initialBidPrice')
@@ -136,9 +137,14 @@ def addProductToInventory(request):
    else:
      imagelist=''  
      
+     
    data['productImages']=imagelist
+   data['productImages']=product.productImage
+   
+   
    
    serialaizer=productInventorySerializer(data=data)
+   
    if serialaizer.is_valid(raise_exception=True):
       serialaizer.save()
       return Response("Done",status=status.HTTP_200_OK) 
@@ -162,6 +168,7 @@ def getMyListedProductList(request):
     elif filter_=="bidded":
       productList=ProductInventory.objects.filter(farmerId=data['farmerId'],status="bidded")
     elif filter_=="confrimed":
+      print("confrimed")
       productList=ProductInventory.objects.filter(farmerId=data['farmerId'],status="confrimed")
     elif filter_=="All":
      productList=ProductInventory.objects.filter(farmerId=data['farmerId'])
@@ -271,6 +278,7 @@ def tp(request):
 def searchProductsForVendorFilter(request): 
  try:
   data=json.loads(request.body)
+  print(data)
   vendor=Vendor.objects.get(id=data['vendorId'])
   # 
   if "filter" in data:
@@ -316,6 +324,7 @@ def inventoryProductListForVendor(request):
 def specificProductDetailsForVendor(request):  
  try: 
    data=json.loads(request.body)
+   print(data)
    vendor=Vendor.objects.get(id=data['vendorId'])
    product=ProductInventory.objects.get(inventoryId=data['productId'])
    farmer=Farmers.objects.get(id=product.farmerId)
@@ -326,11 +335,14 @@ def specificProductDetailsForVendor(request):
    print(productData["inventoryId"])
    bidData=ProductBidding.objects.filter(inventoryId=productData['inventoryId']).order_by('-bidAmount')
    bidData=ProductBiddingSerializer(bidData,many=True).data
-   print(bidData)     
+   print(bidData)  
+      
    productData["previousBids"]=bidData
-   
+  #  print(productData['distance'])
+  #  productData['distance']="%0.2f"%productData['distance']
    productData.update(farmerData)
    del productData['farmerLocation']
+   productData['distance']="%0.2f"%productData['distance']
    return Response(productData,status=status.HTTP_200_OK)
  except Exception as e:
    print(e.args)
@@ -354,8 +366,12 @@ def topfiveProductFromInventory(request):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated]) 
 def productBidList(request):
+ try: 
   data=json.loads(request.body)
+  
   filter_=data['filter']
+  print("Dddddd") 
+  print(data)  
   if filter_=="latest":
    productBids=ProductBidding.objects.filter(inventoryId=data['inventoryId']).exclude(bidStatus="rejected").order_by('-dateTime')
     
@@ -377,7 +393,14 @@ def productBidList(request):
     rejected=ProductBidding.objects.filter(bidStatus="rejected").order_by('-dateTime')
     rejected=ProductBiddingSerializer(rejected,many=True).data
     data=productBids+rejected
+    
+    
     return Response(data,status=status.HTTP_200_OK)
+  else:
+    return Response("d")
+ except Exception as e:
+   print(e.args)
+   return Response(e.args) 
     
     
 
@@ -400,6 +423,7 @@ def bidOnProduct(request):
   data['dateTime']=timezone.localtime(timezone.now())
   print(data)
   try:
+   
    updateBid=ProductBidding.objects.get(inventoryId=data['inventoryId'],vendorId=data['vendorId'])
    updateBid.dateTime=timezone.localtime(timezone.now())
    print(timezone.localtime(timezone.now()))
@@ -410,10 +434,13 @@ def bidOnProduct(request):
    ProductInventory.objects.filter(inventoryId=data['inventoryId']).update(currentBidPrice=updateBid.bidAmount,status="bidded")
    return Response("done",status=status.HTTP_200_OK)
   except ObjectDoesNotExist as e:
+     vendor=Vendor.objects.get(id=data['vendorId'])
+     data['vendorName']=vendor.fName
      bidSrializer=ProductBiddingSerializer(data=data)
      if bidSrializer.is_valid(raise_exception=True):
+       
         bid=bidSrializer.save()
-        ProductInventory.objects.filter(inventoryId=data['inventoryId']).update(currentBidPrice=data['bidAmount'],status="bidded")  
+        # ProductInventory.objects.filter(inventoryId=data['inventoryId']).update(currentBidPrice=data['bidAmount'],status="bidded")  
       
         return Response("done",status=status.HTTP_200_OK)
     
@@ -434,7 +461,8 @@ def farmerAcceptOrRejectBid(request):
    product=ProductBidding.objects.filter(bidId=data['bidId']).update(bidStatus="rejected")
   else:
     productBid=ProductBidding.objects.filter(bidId=data['bidId']).update(bidStatus="Accepted")
-    status=ProductInventory.objects.filter(productId=productBid['inventoryId']).update(status="confirmed")
+    print(productBid)
+    ProductInventory.objects.filter(inventoryId=data['inventoryId']).update(status="confirmed")
   return Response("done",status=status.HTTP_200_OK)  
  except Exception as e:  
    print(e.args)
@@ -510,11 +538,12 @@ def delete(request):
 @api_view(["POST"])
 def insertInAllProducts(request):
   data=json.loads(request.body)             
-  products=data['list']
+  products=data['products']
   for x in products:
     print(x)
     print()
-    serializer=AllProductListSerializer(data={"productName":x,"productMarketPrice":"%.2f"%random.uniform(40,200)})
+    x['productMarketPrice']="%.2f"%random.uniform(40,200)
+    serializer=AllProductListSerializer(data=x)
     if serializer.is_valid(raise_exception=True):
       serializer.save()
       print(x)

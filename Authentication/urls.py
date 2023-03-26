@@ -12,7 +12,7 @@ urlpatterns = [
     path("getMyListedProductList/",views.getMyListedProductList),
     path('vendorSignUp/',views.vendorSignUp,name="vendorSignUp"),
     path('vendorLogin/',views.vendorLogin,name="vendorLogin"),
-    path("addVendorLocationDetails",views.addVendorLocationDetails),
+    path("addVendorLocationDetails/",views.addVendorLocationDetails),
     path("specificVendorData/",views.specificVendorData),
     path("searchProductsForVendorFilter/",views.searchProductsForVendorFilter),
     path("specificProductDetailsForVendor/",views.specificProductDetailsForVendor),
